@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Editar Pregunta{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/edit.css') }}">
+{% endblock %}
+
+
+{% block body %}
+{% if is_granted('ROLE_ADMIN') %}
+<div class="container mt-4">
+    <h1 class="mb-4">Editar Pregunta</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">Pregunta #{{ question.id }}</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{ path('edit_question', {'id': question.id}) }}" method="post">
+                <div class="form-group">
+                    <label for="title">Título</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ question.title }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Fecha de Inicio</label>
+                    <input type="datetime-local" class="form-control" id="start_date" name="start_date" value="{{ question.startDate|date('Y-m-d\TH:i') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Fecha de Fin</label>
+                    <input type="datetime-local" class="form-control" id="end_date" name="end_date" value="{{ question.endDate|date('Y-m-d\TH:i') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_a">Opción A</label>
+                    <input type="text" class="form-control" id="question_a" name="question_a" value="{{ question.questionA }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_b">Opción B</label>
+                    <input type="text" class="form-control" id="question_b" name="question_b" value="{{ question.questionB }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_c">Opción C</label>
+                    <input type="text" class="form-control" id="question_c" name="question_c" value="{{ question.questionC }}">
+                </div>
+                <div class="form-group">
+                    <label for="question_d">Opción D</label>
+                    <input type="text" class="form-control" id="question_d" name="question_d" value="{{ question.questionD }}">
+                </div>
+                <div class="form-group">
+                    <label for="correctAnswer">Respuesta Correcta</label>
+                    <select class="form-control" id="correctAnswer" name="correctAnswer" required>
+                        <option value="A" {% if question.correctAnswer == 'A' %}selected{% endif %}>A</option>
+                        <option value="B" {% if question.correctAnswer == 'B' %}selected{% endif %}>B</option>
+                        <option value="C" {% if question.correctAnswer == 'C' %}selected{% endif %}>C</option>
+                        <option value="D" {% if question.correctAnswer == 'D' %}selected{% endif %}>D</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Actualizar Pregunta</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% else %}
+    <div class="container mt-4">
+        <div class="alert alert-danger" role="alert">
+            No tienes permisos para acceder a esta página. Por favor, contacta con un administrador.
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

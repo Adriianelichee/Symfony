@@ -1,0 +1,152 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Preguntas{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/questions.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Lista de Preguntas</h1>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{ path('send_questions_pdf') }}" class="btn btn-primary mb-3">Enviar PDF por correo</a>
+    {% endif %}
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Fecha de Inicio</th>
+                <th>Fecha de Fin</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for question in questions %}
+                <tr>
+                    <td>{{ question.id }}</td>
+                    <td>{{ question.title }}</td>
+                    <td>{{ question.startDate|date('Y-m-d H:i:s') }}</td>
+                    <td>{{ question.endDate|date('Y-m-d H:i:s') }}</td>
+                    <td>
+                        {% if question.endDate < date() %}
+                            <span class="badge bg-danger">Caducada</span>
+                        {% else %}
+                            <span class="badge bg-success">Activa</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
+                            {% if question.endDate > date() %}
+                                <a href="{{ path('app_answers', {'id': question.id}) }}" class="btn btn-primary btn-sm">Responder</a>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>Caducada</button>
+                            {% endif %}
+                        {% endif %}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('edit_question', {'id': question.id}) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ path('delete_question', {'id': question.id}) }}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta pregunta?');" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-question-' ~ question.id) }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                            <a href="{{ path('app_answers', {'id': question.id}) }}" class="btn btn-info btn-sm">Mostrar</a>
+                        {% endif %}
+                        <button class="btn btn-primary btn-sm showChart" data-question-id="{{ question.id }}">Mostrar Gráfico</button>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">No se encontraron preguntas</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    </table>
+
+    {% if is_granted('ROLE_ADMIN') %}
+    <a href="{{ path('show_create_question_form') }}" class="btn btn-success">Crear Nueva Pregunta</a>
+    {% endif %}
+
+</div>
+
+<div id="chartContainer" style="display: none; width: 400px; height: 300px;">
+    <canvas id="answerChart"></canvas>
+</div>
+{% endblock %}
+
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartContainer = document.getElementById('chartContainer');
+    const showChartButtons = document.querySelectorAll('.showChart');
+
+    showChartButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const selectedQuestionId = this.getAttribute('data-question-id');
+
+            const apiUrl = `http://127.0.0.1:8000/api/question/${selectedQuestionId}/stats`;
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    chartContainer.style.display = 'block';
+                    const ctx = document.getElementById('answerChart').getContext('2d');
+
+                    // Destruir el gráfico existente si lo hay
+                    if (window.myChart instanceof Chart) {
+                        window.myChart.destroy();
+                    }
+
+                    const chartData = {
+                        labels: Object.keys(data.answers),
+                        datasets: [{
+                            label: data.questionTitle,
+                            data: Object.values(data.answers),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                            ],
+                            borderColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                            ],
+                            borderWidth: 1
+                        }]
+                    };
+
+                    window.myChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Estadísticas de Respuestas',
+                                    font: {
+                                        size: 14
+                                    }
+                                },
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
+{% endblock %}

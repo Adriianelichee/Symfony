@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Panel de Administración - Crear Pregunta{% endblock %}
+
+{% block body %}
+{% if is_granted('ROLE_ADMIN') %}
+<div class="container mt-4">
+    <h1 class="mb-4">Panel de Administración</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">Crear Nueva Pregunta</h2>
+        </div>
+        <div class="card-body">
+            <form action="{{ path('create_question') }}" method="post">
+                <div class="form-group">
+                    <label for="title">Título</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="start_date">Fecha de Inicio</label>
+                    <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_date">Fecha de Fin</label>
+                    <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_a">Opción A</label>
+                    <input type="text" class="form-control" id="question_a" name="question_a" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_b">Opción B</label>
+                    <input type="text" class="form-control" id="question_b" name="question_b" required>
+                </div>
+                <div class="form-group">
+                    <label for="question_c">Opción C</label>
+                    <input type="text" class="form-control" id="question_c" name="question_c">
+                </div>
+                <div class="form-group">
+                    <label for="question_d">Opción D</label>
+                    <input type="text" class="form-control" id="question_d" name="question_d">
+                </div>
+                <div class="form-group">
+                    <label for="correctAnswer">Respuesta Correcta</label>
+                    <select class="form-control" id="correctAnswer" name="correctAnswer" required>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Crear Pregunta</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% else %}
+    <div class="container mt-4">
+        <div class="alert alert-danger" role="alert">
+            No tienes permisos para acceder a esta página. Por favor, contacta con un administrador.
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}

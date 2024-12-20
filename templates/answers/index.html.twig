@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Responder a la pregunta{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/answers.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="example-wrapper">
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
+        <h2>{{ question.title }}</h2>
+        <form action="{{ path('submit_answer') }}" method="post">
+            <input type="hidden" name="questionId" value="{{ question.id }}">
+            <div>
+                <input type="radio" id="optionA" name="ch_answer" value="A" required>
+                <label for="optionA">A: {{ question.questionA }}</label>
+            </div>
+            <div>
+                <input type="radio" id="optionB" name="ch_answer" value="B" required>
+                <label for="optionB">B: {{ question.questionB }}</label>
+            </div>
+            {% if question.questionC %}
+            <div>
+                <input type="radio" id="optionC" name="ch_answer" value="C" required>
+                <label for="optionC">C: {{ question.questionC }}</label>
+            </div>
+            {% endif %}
+            {% if question.questionD %}
+            <div>
+                <input type="radio" id="optionD" name="ch_answer" value="D" required>
+                <label for="optionD">D: {{ question.questionD }}</label>
+            </div>
+            {% endif %}
+            <button type="submit">Enviar Respuesta</button>
+        </form>
+    {% else %}
+        <h1>Ver Pregunta</h1>
+        <h2>{{ question.title }}</h2>
+        <input type="hidden" name="questionId" value="{{ question.id }}">
+        <label for="optionA">A: {{ question.questionA }}</label>
+        <label for="optionB">B: {{ question.questionB }}</label>
+        <label for="optionC">C: {{ question.questionC }}</label>
+        <label for="optionD">D: {{ question.questionD }}</label>
+        
+    {% endif %}
+</div>
+{% endblock %}
